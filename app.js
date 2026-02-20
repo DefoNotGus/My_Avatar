@@ -1,15 +1,18 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
+// Container
+const container = document.getElementById('avatar-container');
+
 // Scene
 const scene = new THREE.Scene();
 
 // Clock
 let mixer;
-const clock = new THREE.Clock(); 
+const clock = new THREE.Clock();
 const camera = new THREE.PerspectiveCamera(
   75,
-  window.innerWidth / window.innerHeight,
+  container.clientWidth / container.clientHeight,
   0.1,
   1000
 );
@@ -20,9 +23,9 @@ camera.rotation.y = 0.35;
 
 // Renderer with transparent background
 const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setSize(container.clientWidth, container.clientHeight);
 renderer.setPixelRatio(window.devicePixelRatio);
-document.body.appendChild(renderer.domElement);
+container.appendChild(renderer.domElement);
 
 // Lighting
 const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
@@ -58,15 +61,16 @@ gltfLoader.load('tag2.glb', (gltf) => {
 const mouse = { x: 0, y: 0 };
 
 window.addEventListener('mousemove', (event) => {
-  mouse.x = (event.clientX / window.innerWidth - 0.5) * 2;
-  mouse.y = -(event.clientY / window.innerHeight - 0.5) * 2;
+  const rect = container.getBoundingClientRect();
+  mouse.x = ((event.clientX - rect.left) / rect.width - 0.5) * 2;
+  mouse.y = -((event.clientY - rect.top) / rect.height - 0.5) * 2;
 });
 
 // Handle window resize
 window.addEventListener('resize', () => {
-  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.aspect = container.clientWidth / container.clientHeight;
   camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setSize(container.clientWidth, container.clientHeight);
 });
 
 // Animation loop
@@ -78,8 +82,8 @@ function animate() {
   }
   
   if (headBone) {
-    headBone.rotation.y = mouse.x * Math.PI * 0.25;
-    headBone.rotation.x = -mouse.y * Math.PI * 0.25; 
+    headBone.rotation.y = mouse.x * Math.PI * 0.15;
+    headBone.rotation.x = -mouse.y * Math.PI * 0.15; 
   }
 
   // Force the arms down after the mixer has updated
@@ -94,9 +98,3 @@ function animate() {
 }
 
 animate();
-
-// Find your container
-const container = document.getElementById('avatar-container');
-
-// Append the renderer to the div instead of document.body
-container.appendChild(renderer.domElement);
